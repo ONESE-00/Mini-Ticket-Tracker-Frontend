@@ -148,55 +148,72 @@
   }
 }
 
-/* Toast design ported from the ReconMaster app-toast look:
-   a compact rounded card with a ~10% tint of the type colour as the
-   background, the full type colour as the border + text + icon, a soft
-   shadow and a gentle fly-in from the top. Applied to ngx-sonner, which
-   renders each toast as [data-sonner-toast][data-type]. richColors is on, so
-   these per-type CSS variables drive the colours. */
-:where([data-sonner-toaster][data-rich-colors='true']) {
-  /* Exact ReconMaster accent colours. */
-  --toast-success: #05af21; /* --green */
-  --toast-error: #ed1d24; /* --red */
-  --toast-warning: #f57e20; /* --orange */
-  --toast-info: #2a5caa; /* --dark-blue */
-
-  /* Success — green border/text, 10% tint background (fallback #e6f7ea). */
-  --success-border: var(--toast-success);
-  --success-text: var(--toast-success);
+/* Toast colours matched to the ReconMaster app-toast look: the full type
+   colour as border + text + icon, and a ~10% tint of it as the background.
+   ngx-sonner reads its `--ngx-sonner-toast-*` hooks first (then falls back to
+   its own defaults), so we set those directly — and the resolved `--*-bg`
+   family too — at real specificity (no :where) so our values always win,
+   regardless of the resolved theme. The toaster is forced to light theme in
+   the shell, so there is no dark variant to fight. */
+[data-sonner-toaster][data-rich-colors='true'] {
+  /* success — green #05af21, light-green tint background */
+  --ngx-sonner-toast-success-background: #e6f7ea;
+  --ngx-sonner-toast-success-border: #05af21;
+  --ngx-sonner-toast-success-color: #05af21;
   --success-bg: #e6f7ea;
-  --success-bg: color-mix(in srgb, var(--toast-success) 10%, #fff);
+  --success-border: #05af21;
+  --success-text: #05af21;
 
-  /* Error — red (fallback #fdeaea). */
-  --error-border: var(--toast-error);
-  --error-text: var(--toast-error);
+  /* error — red #ed1d24 */
+  --ngx-sonner-toast-error-background: #fdeaea;
+  --ngx-sonner-toast-error-border: #ed1d24;
+  --ngx-sonner-toast-error-color: #ed1d24;
   --error-bg: #fdeaea;
-  --error-bg: color-mix(in srgb, var(--toast-error) 10%, #fff);
+  --error-border: #ed1d24;
+  --error-text: #ed1d24;
 
-  /* Warning — orange (fallback #fef1e6). */
-  --warning-border: var(--toast-warning);
-  --warning-text: var(--toast-warning);
+  /* warning — orange #f57e20 */
+  --ngx-sonner-toast-warning-background: #fef1e6;
+  --ngx-sonner-toast-warning-border: #f57e20;
+  --ngx-sonner-toast-warning-color: #f57e20;
   --warning-bg: #fef1e6;
-  --warning-bg: color-mix(in srgb, var(--toast-warning) 10%, #fff);
+  --warning-border: #f57e20;
+  --warning-text: #f57e20;
 
-  /* Info — dark blue. */
-  --info-border: var(--toast-info);
-  --info-text: var(--toast-info);
-  --info-bg: color-mix(in srgb, var(--toast-info) 10%, #fff);
+  /* info — dark blue #2a5caa */
+  --ngx-sonner-toast-info-background: #eaf0f8;
+  --ngx-sonner-toast-info-border: #2a5caa;
+  --ngx-sonner-toast-info-color: #2a5caa;
+  --info-bg: #eaf0f8;
+  --info-border: #2a5caa;
+  --info-text: #2a5caa;
+}
+
+/* Belt-and-braces: pin the success toast's resolved colours directly, in case
+   a resolved theme sets them with higher specificity than the hooks above. */
+[data-rich-colors='true'] [data-sonner-toast][data-type='success'] {
+  background: #e6f7ea;
+  border-color: #05af21;
+  color: #05af21;
+}
+[data-rich-colors='true'] [data-sonner-toast][data-type='error'] {
+  background: #fdeaea;
+  border-color: #ed1d24;
+  color: #ed1d24;
 }
 
 /* Card shape + motion, matching the reconmaster look. */
-:where([data-sonner-toaster]) [data-sonner-toast] {
+[data-sonner-toaster] [data-sonner-toast] {
   border-width: 1px;
   border-radius: 0.5rem;
   box-shadow: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.1);
   font-weight: 500;
   animation: app-toast-fly-in 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-:where([data-sonner-toaster]) [data-sonner-toast] [data-title] {
+[data-sonner-toaster] [data-sonner-toast] [data-title] {
   font-weight: 700;
 }
-:where([data-sonner-toaster]) [data-sonner-toast]:hover {
+[data-sonner-toaster] [data-sonner-toast]:hover {
   box-shadow: 0 0.625rem 1.625rem rgba(0, 0, 0, 0.14);
 }
 
@@ -209,22 +226,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.dark :where([data-sonner-toaster][data-rich-colors='true']) {
-  --success-bg: color-mix(in srgb, var(--toast-success) 20%, #0b0b0b);
-  --success-border: var(--toast-success);
-  --success-text: oklch(0.9 0.08 150);
-
-  --error-bg: color-mix(in srgb, var(--toast-error) 20%, #0b0b0b);
-  --error-border: var(--toast-error);
-  --error-text: oklch(0.9 0.1 27);
-
-  --warning-bg: color-mix(in srgb, var(--toast-warning) 20%, #0b0b0b);
-  --warning-border: var(--toast-warning);
-  --warning-text: oklch(0.9 0.1 70);
-
-  --info-bg: color-mix(in srgb, var(--toast-info) 20%, #0b0b0b);
-  --info-border: var(--toast-info);
-  --info-text: oklch(0.9 0.08 264);
 }

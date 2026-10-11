@@ -65,8 +65,8 @@ import { ZardSonnerComponent } from '@/shared/components/sonner/sonner.component
       </main>
     </z-sidebar-provider>
 
-    <!-- One toaster for the whole app: top-center, rich semantic colors. -->
-    <z-sonner position="top-center" [richColors]="true" />
+    <!-- One toaster for the whole app: top-center, rich semantic colors, light theme. -->
+    <z-sonner position="top-center" theme="light" [richColors]="true" />
   `,
 })
 export class ShellComponent {}

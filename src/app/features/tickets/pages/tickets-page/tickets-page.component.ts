@@ -184,9 +184,12 @@ export default class TicketsPageComponent {
   }
 
   private openDialog(data: Omit<TicketDialogData, 'onResult'>): void {
+    // Create has no history (single column) so stays compact (base 32rem +10%);
+    // view/edit place the form and history side by side, so they need room.
+    const zWidth = data.mode === 'create' ? '35.2rem' : 'min(52rem, 95vw)';
     this.dialog.create<TicketFormDialogComponent, TicketDialogData>({
       zContent: TicketFormDialogComponent,
-      zWidth: '32rem',
+      zWidth,
       zHideHeader: true,
       zHideFooter: true,
       zData: {

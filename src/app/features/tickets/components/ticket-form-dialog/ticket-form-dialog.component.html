@@ -26,78 +26,84 @@
         <button z-button zType="outline" (click)="retry()">Try again</button>
       </div>
     } @else {
-      <form [formGroup]="form" class="flex flex-col gap-4" (ngSubmit)="submit()">
-        <!-- Title -->
-        <div z-field [attr.data-invalid]="(form.controls.title.touched && form.controls.title.invalid) || null">
-          <label z-field-label for="ticket-title">Title</label>
-          <input
-            z-input
-            id="ticket-title"
-            formControlName="title"
-            maxlength="200"
-            placeholder="Short summary of the issue"
-            [attr.aria-invalid]="(form.controls.title.touched && form.controls.title.invalid) || null"
-          />
-          @if (form.controls.title.touched && form.controls.title.hasError('required')) {
-            <z-field-error>Title is required.</z-field-error>
-          } @else if (form.controls.title.hasError('maxlength')) {
-            <z-field-error>Title must be 200 characters or fewer.</z-field-error>
-          } @else if (serverError('title')) {
-            <z-field-error>{{ serverError('title') }}</z-field-error>
-          }
-        </div>
-
-        <!-- Description -->
-        <div z-field>
-          <label z-field-label for="ticket-description">Description</label>
-          <textarea
-            z-textarea
-            id="ticket-description"
-            formControlName="description"
-            rows="4"
-            placeholder="Steps to reproduce, context, links…"
-          ></textarea>
-          @if (serverError('description')) {
-            <z-field-error>{{ serverError('description') }}</z-field-error>
-          }
-        </div>
-
-        <!-- Priority -->
-        <div z-field>
-          <label z-field-label for="ticket-priority">Priority</label>
-          <z-select id="ticket-priority" formControlName="priority" zPlaceholder="Select priority">
-            @for (opt of priorityOptions; track opt.value) {
-              <z-select-item [zValue]="opt.value">{{ opt.label }}</z-select-item>
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <!-- Form column -->
+        <form [formGroup]="form" class="flex flex-1 flex-col gap-4" (ngSubmit)="submit()">
+          <!-- Title -->
+          <div z-field [attr.data-invalid]="(form.controls.title.touched && form.controls.title.invalid) || null">
+            <label z-field-label for="ticket-title">Title</label>
+            <input
+              z-input
+              id="ticket-title"
+              formControlName="title"
+              maxlength="200"
+              placeholder="Short summary of the issue"
+              [attr.aria-invalid]="(form.controls.title.touched && form.controls.title.invalid) || null"
+            />
+            @if (form.controls.title.touched && form.controls.title.hasError('required')) {
+              <z-field-error>Title is required.</z-field-error>
+            } @else if (form.controls.title.hasError('maxlength')) {
+              <z-field-error>Title must be 200 characters or fewer.</z-field-error>
+            } @else if (serverError('title')) {
+              <z-field-error>{{ serverError('title') }}</z-field-error>
             }
-          </z-select>
-        </div>
+          </div>
 
-        <!-- Status: hidden/disabled on create; limited transitions on edit -->
-        @if (!isCreate()) {
+          <!-- Description -->
           <div z-field>
-            <label z-field-label for="ticket-status">Status</label>
-            @if (isEdit() && !statusLocked()) {
-              <z-select id="ticket-status" formControlName="status" zPlaceholder="Select status">
-                @for (opt of statusOptions(); track opt.value) {
+            <label z-field-label for="ticket-description">Description</label>
+            <textarea
+              z-textarea
+              id="ticket-description"
+              formControlName="description"
+              rows="4"
+              placeholder="Steps to reproduce, context, links…"
+            ></textarea>
+            @if (serverError('description')) {
+              <z-field-error>{{ serverError('description') }}</z-field-error>
+            }
+          </div>
+
+          <!-- Status + priority share a row -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Priority -->
+            <div z-field>
+              <label z-field-label for="ticket-priority">Priority</label>
+              <z-select id="ticket-priority" formControlName="priority" zPlaceholder="Select priority">
+                @for (opt of priorityOptions; track opt.value) {
                   <z-select-item [zValue]="opt.value">{{ opt.label }}</z-select-item>
                 }
               </z-select>
-            } @else {
-              <input z-input id="ticket-status" formControlName="status" readonly />
-              @if (statusLocked()) {
-                <p z-field-description>Closed tickets are terminal — status can’t change.</p>
-              }
+            </div>
+
+            <!-- Status: hidden on create; limited transitions on edit -->
+            @if (!isCreate()) {
+              <div z-field>
+                <label z-field-label for="ticket-status">Status</label>
+                @if (isEdit() && !statusLocked()) {
+                  <z-select id="ticket-status" formControlName="status" zPlaceholder="Select status">
+                    @for (opt of statusOptions(); track opt.value) {
+                      <z-select-item [zValue]="opt.value">{{ opt.label }}</z-select-item>
+                    }
+                  </z-select>
+                } @else {
+                  <input z-input id="ticket-status" formControlName="status" readonly />
+                  @if (statusLocked()) {
+                    <p z-field-description>Closed tickets are terminal.</p>
+                  }
+                }
+              </div>
             }
           </div>
-        }
-      </form>
+        </form>
 
-      <!-- History on view only -->
-      @if (isView()) {
-        <div class="mt-6 border-t pt-4">
-          <app-ticket-history [entries]="history()" [loading]="loadingHistory()" />
-        </div>
-      }
+        <!-- History column (view + edit), beside the form on large screens -->
+        @if (!isCreate()) {
+          <div class="border-t pt-4 lg:w-72 lg:shrink-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+            <app-ticket-history [entries]="history()" [loading]="loadingHistory()" />
+          </div>
+        }
+      </div>
     }
   </div>
 

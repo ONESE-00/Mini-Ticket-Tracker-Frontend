@@ -148,25 +148,80 @@
   }
 }
 
-/* Toast (ngx-sonner richColors) brand overrides:
-   light-green success, red error. Variables are read by the toaster when
-   [data-rich-colors='true'] + [data-type] is set on each toast. */
+/* Toast design ported from the ReconMaster app-toast look:
+   a compact rounded card with a ~10% tint of the type colour as the
+   background, the full type colour as the border + text + icon, a soft
+   shadow and a gentle fly-in from the top. Applied to ngx-sonner, which
+   renders each toast as [data-sonner-toast][data-type]. richColors is on, so
+   these per-type CSS variables drive the colours. */
 :where([data-sonner-toaster][data-rich-colors='true']) {
-  --success-bg: oklch(0.96 0.045 150);
-  --success-border: oklch(0.88 0.07 150);
-  --success-text: oklch(0.42 0.1 150);
+  /* Type accents (full colour). */
+  --toast-success: oklch(0.62 0.17 150);
+  --toast-error: oklch(0.58 0.22 27);
+  --toast-warning: oklch(0.72 0.17 60);
+  --toast-info: oklch(0.5 0.12 264);
 
-  --error-bg: oklch(0.96 0.05 25);
-  --error-border: oklch(0.86 0.1 25);
-  --error-text: oklch(0.5 0.2 27);
+  /* Success — green border/text, 10% tint background. */
+  --success-border: var(--toast-success);
+  --success-text: var(--toast-success);
+  --success-bg: color-mix(in srgb, var(--toast-success) 12%, #fff);
+
+  /* Error — red. */
+  --error-border: var(--toast-error);
+  --error-text: var(--toast-error);
+  --error-bg: color-mix(in srgb, var(--toast-error) 12%, #fff);
+
+  /* Warning — orange. */
+  --warning-border: var(--toast-warning);
+  --warning-text: var(--toast-warning);
+  --warning-bg: color-mix(in srgb, var(--toast-warning) 12%, #fff);
+
+  /* Info — brand blue. */
+  --info-border: var(--toast-info);
+  --info-text: var(--toast-info);
+  --info-bg: color-mix(in srgb, var(--toast-info) 12%, #fff);
+}
+
+/* Card shape + motion, matching the reconmaster look. */
+:where([data-sonner-toaster]) [data-sonner-toast] {
+  border-width: 1px;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  animation: app-toast-fly-in 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+:where([data-sonner-toaster]) [data-sonner-toast] [data-title] {
+  font-weight: 700;
+}
+:where([data-sonner-toaster]) [data-sonner-toast]:hover {
+  box-shadow: 0 0.625rem 1.625rem rgba(0, 0, 0, 0.14);
+}
+
+@keyframes app-toast-fly-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dark :where([data-sonner-toaster][data-rich-colors='true']) {
-  --success-bg: oklch(0.28 0.06 150);
-  --success-border: oklch(0.4 0.08 150);
-  --success-text: oklch(0.9 0.06 150);
+  --success-bg: color-mix(in srgb, var(--toast-success) 20%, #0b0b0b);
+  --success-border: var(--toast-success);
+  --success-text: oklch(0.9 0.08 150);
 
-  --error-bg: oklch(0.28 0.08 25);
-  --error-border: oklch(0.45 0.12 25);
-  --error-text: oklch(0.9 0.08 25);
+  --error-bg: color-mix(in srgb, var(--toast-error) 20%, #0b0b0b);
+  --error-border: var(--toast-error);
+  --error-text: oklch(0.9 0.1 27);
+
+  --warning-bg: color-mix(in srgb, var(--toast-warning) 20%, #0b0b0b);
+  --warning-border: var(--toast-warning);
+  --warning-text: oklch(0.9 0.1 70);
+
+  --info-bg: color-mix(in srgb, var(--toast-info) 20%, #0b0b0b);
+  --info-border: var(--toast-info);
+  --info-text: oklch(0.9 0.08 264);
 }

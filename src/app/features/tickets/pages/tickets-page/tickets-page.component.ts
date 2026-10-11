@@ -130,6 +130,7 @@ export default class TicketsPageComponent {
   protected readonly page = computed(() => this.query().page);
   protected readonly limit = computed(() => this.query().limit);
   protected readonly selectedStatus = computed(() => this.query().status);
+  protected readonly selectedPriority = computed(() => this.query().priority);
 
   // ---- handlers (all reset to page 1 except explicit paging/sort)
   protected onSearch(search: string): void {
@@ -147,6 +148,10 @@ export default class TicketsPageComponent {
 
   protected onStatusCard(status: TicketStatus | null): void {
     this.query.update((q) => ({ ...q, status, page: 1 }));
+  }
+
+  protected onPriorityCard(priority: TicketPriority | null): void {
+    this.query.update((q) => ({ ...q, priority, page: 1 }));
   }
 
   protected onSort(sort: SortState): void {

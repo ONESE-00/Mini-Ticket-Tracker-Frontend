@@ -80,3 +80,17 @@ Running log of non-obvious choices and assumptions. Feeds the README
   indeterminate state, so the header "select all" shows checked only when every
   row on the current page is selected; partial selection shows unchecked.
   Selection is tracked by id and preserved across pages by the parent.
+- **Single-hue badge system.** To avoid a rainbow UI, status badges use blue
+  shades (blue-50/100/200, lightening to darkening across open → closed) and
+  priority badges use orange shades (orange-50/100/200 across low → high). One
+  hue per dimension keeps the table calm and the two axes visually distinct.
+- **Filter "clear" sentinel.** Zard's `z-select` rejects empty-string item
+  values (it early-returns on `''`), so the "All status/All priority" option
+  could not be selected. The data table uses an `__all__` sentinel for the clear
+  option and maps it back to an empty value on `filterChange`, so the public
+  contract still means "no filter". Covered by a regression test.
+- **Stats, two perspectives.** `GET /tickets/stats` returns both status counts
+  (open/in_progress/closed/total) and priority counts (low/medium/high). The
+  landing page shows a "By status" and a "By priority" card group, each
+  click-to-filter. This extends the brief's stats shape (which only required
+  status counts) — noted here as an intentional addition.

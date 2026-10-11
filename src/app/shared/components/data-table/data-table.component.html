@@ -23,9 +23,9 @@
             class="w-full sm:w-44"
             [zPlaceholder]="filter.label"
             [ngModel]="filterValue(filter.key)"
-            (ngModelChange)="filterChange.emit({ key: filter.key, value: $event })"
+            (ngModelChange)="onFilterSelect(filter.key, $event)"
           >
-            <z-select-item zValue="">All {{ filter.label.toLowerCase() }}</z-select-item>
+            <z-select-item [zValue]="allFilter">All {{ filter.label.toLowerCase() }}</z-select-item>
             @for (opt of filter.options; track opt.value) {
               <z-select-item [zValue]="opt.value">{{ opt.label }}</z-select-item>
             }

@@ -16,17 +16,20 @@ export const PRIORITY_LABELS: Record<TicketPriority, string> = {
   high: 'High',
 };
 
-// Tailwind tint classes for badges. Tokens/utility classes only, no inline hex.
+// Badge tints use a single hue per dimension to avoid a rainbow UI:
+//  - Status: blue shades (light -> dark as it progresses open -> closed).
+//  - Priority: orange/amber shades (light -> dark as severity rises).
+// Utility classes only, no inline hex.
 export const STATUS_BADGE_CLASS: Record<TicketStatus, string> = {
-  open: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
-  in_progress: 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300',
-  closed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+  open: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+  in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  closed: 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100',
 };
 
 export const PRIORITY_BADGE_CLASS: Record<TicketPriority, string> = {
-  low: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-  medium: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-  high: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
+  low: 'bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
+  medium: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  high: 'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100',
 };
 
 // Forward-only state machine: open -> in_progress -> closed. Closed is terminal.

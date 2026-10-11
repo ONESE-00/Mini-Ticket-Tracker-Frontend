@@ -36,6 +36,7 @@ interface UserRow extends Record<string, unknown> {
       (sortChange)="lastSort = $event"
       (pageChange)="lastPage = $event"
       (actionClick)="lastAction = $event"
+      (filterChange)="lastFilter = $event"
     />
   `,
 })
@@ -158,5 +159,22 @@ describe('DataTableComponent (generic)', () => {
       new Event('click'),
     );
     expect(host.lastAction).toEqual({ actionId: 'view', row });
+  });
+
+  it('clears a filter by mapping the ALL sentinel to an empty value', async () => {
+    const { fixture, host } = await setup();
+    host.columns.set([{ key: 'title', header: 'Title', type: 'text' }] as ColumnDef<Record<string, unknown>>[]);
+    host.data.set([{ id: 't1', title: 'A' }] as TicketRow[]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const table = fixture.debugElement.children[0].componentInstance as DataTableComponent<Record<string, unknown>>;
+    const api = table as unknown as { onFilterSelect: (k: string, v: string) => void; allFilter: string };
+    // A concrete value is forwarded as-is.
+    api.onFilterSelect('status', 'open');
+    expect(host.lastFilter).toEqual({ key: 'status', value: 'open' });
+    // The ALL sentinel clears the filter (empty string on the public contract).
+    api.onFilterSelect('status', api.allFilter);
+    expect(host.lastFilter).toEqual({ key: 'status', value: '' });
   });
 });

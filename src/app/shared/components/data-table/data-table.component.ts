@@ -17,6 +17,9 @@ import { ZardTableImports } from '@/shared/components/table/table.imports';
 import { DataTableCellDirective } from './data-table-cell.directive';
 import type { ActionEvent, ColumnDef, FilterChange, FilterDef, PageState, RowAction, SortState } from './data-table.types';
 
+/** Sentinel for the "clear filter" option — the Zard select rejects '' values. */
+const ALL_FILTER = '__all__';
+
 /**
  * Presentation-only, config-driven data table. The parent owns the data,
  * current page, filters and sort; the table renders what it is given and emits
@@ -115,8 +118,18 @@ export class DataTableComponent<T extends Record<string, unknown>> {
   }
 
   protected filterValue(key: string): string {
-    return this.filterValues()[key] ?? '';
+    // The Zard select rejects empty-string values, so a cleared filter is
+    // represented by the ALL sentinel in the control.
+    const current = this.filterValues()[key];
+    return current ? current : ALL_FILTER;
   }
+
+  /** Map the select's value back to the public contract (ALL sentinel -> ''). */
+  protected onFilterSelect(key: string, value: string): void {
+    this.filterChange.emit({ key, value: value === ALL_FILTER ? '' : value });
+  }
+
+  protected readonly allFilter = ALL_FILTER;
 
   protected dateValue(col: ColumnDef<T>, row: T): string | number | Date | null {
     const v = row[col.key];

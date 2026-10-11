@@ -8,7 +8,9 @@
     [stats]="stats()"
     [loading]="statsLoading()"
     [selectedStatus]="selectedStatus()"
+    [selectedPriority]="selectedPriority()"
     (statusSelect)="onStatusCard($event)"
+    (prioritySelect)="onPriorityCard($event)"
   />
 
   <app-data-table

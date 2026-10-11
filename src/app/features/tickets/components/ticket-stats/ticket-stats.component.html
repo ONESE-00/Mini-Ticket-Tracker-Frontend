@@ -1,24 +1,59 @@
-<div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-  @for (card of cards; track card.key) {
-    <button
-      type="button"
-      z-card
-      class="text-left transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-      [class.border-primary]="isActive(card)"
-      [class.ring-1]="isActive(card)"
-      [class.ring-primary]="isActive(card)"
-      [attr.aria-pressed]="isActive(card)"
-      [attr.aria-label]="'Filter by ' + card.label"
-      (click)="onSelect(card)"
-    >
-      <div z-card-content class="flex flex-col gap-1 py-4">
-        <span class="text-sm text-muted-foreground">{{ card.label }}</span>
-        @if (loading()) {
-          <z-skeleton class="h-8 w-12 rounded" />
-        } @else {
-          <span class="text-3xl font-semibold tabular-nums" [class]="card.accent">{{ count(card.key) }}</span>
-        }
-      </div>
-    </button>
-  }
+<div class="flex flex-col gap-4">
+  <!-- Status perspective -->
+  <div class="flex flex-col gap-2">
+    <h2 class="text-xs font-medium uppercase tracking-wide text-muted-foreground">By status</h2>
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      @for (card of statusCards; track card.key) {
+        <button
+          type="button"
+          z-card
+          class="text-left transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          [class.border-primary]="isStatusActive(card)"
+          [class.ring-1]="isStatusActive(card)"
+          [class.ring-primary]="isStatusActive(card)"
+          [attr.aria-pressed]="isStatusActive(card)"
+          [attr.aria-label]="'Filter by ' + card.label"
+          (click)="onStatus(card)"
+        >
+          <div z-card-content class="flex flex-col gap-1 py-4">
+            <span class="text-sm text-muted-foreground">{{ card.label }}</span>
+            @if (loading()) {
+              <z-skeleton class="h-8 w-12 rounded" />
+            } @else {
+              <span class="text-3xl font-semibold tabular-nums" [class]="card.accent">{{ count(card.key) }}</span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Priority perspective -->
+  <div class="flex flex-col gap-2">
+    <h2 class="text-xs font-medium uppercase tracking-wide text-muted-foreground">By priority</h2>
+    <div class="grid grid-cols-3 gap-3">
+      @for (card of priorityCards; track card.key) {
+        <button
+          type="button"
+          z-card
+          class="text-left transition-colors hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          [class.border-accent]="isPriorityActive(card)"
+          [class.ring-1]="isPriorityActive(card)"
+          [class.ring-accent]="isPriorityActive(card)"
+          [attr.aria-pressed]="isPriorityActive(card)"
+          [attr.aria-label]="'Filter by ' + card.label + ' priority'"
+          (click)="onPriority(card)"
+        >
+          <div z-card-content class="flex flex-col gap-1 py-4">
+            <span class="text-sm text-muted-foreground">{{ card.label }}</span>
+            @if (loading()) {
+              <z-skeleton class="h-8 w-12 rounded" />
+            } @else {
+              <span class="text-3xl font-semibold tabular-nums" [class]="card.accent">{{ count(card.key) }}</span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  </div>
 </div>

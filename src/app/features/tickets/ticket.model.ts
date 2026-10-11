@@ -32,6 +32,10 @@ export interface TicketStats {
   in_progress: number;
   closed: number;
   total: number;
+  // Priority perspective (same total, grouped by priority).
+  low: number;
+  medium: number;
+  high: number;
 }
 
 // Request DTOs.

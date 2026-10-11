@@ -1,24 +1,29 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { ZardCardImports } from '@/shared/components/card/card.imports';
 import { ZardSkeletonComponent } from '@/shared/components/skeleton/skeleton.component';
 
-import type { TicketStats } from '../../ticket.model';
-import type { TicketStatus } from '../../ticket.model';
+import type { TicketPriority, TicketStats, TicketStatus } from '../../ticket.model';
 
-interface StatCard {
+interface StatusCard {
   key: 'total' | TicketStatus;
   label: string;
-  /** Accent class for the metric number. */
   accent: string;
-  /** The status this card filters by, or null for Total (clears the filter). */
-  filter: TicketStatus | null;
+  filter: TicketStatus | null; // null = Total (clears status filter)
+}
+
+interface PriorityCard {
+  key: TicketPriority;
+  label: string;
+  accent: string;
 }
 
 /**
- * Four summary cards fed by GET /tickets/stats. Clicking a card applies (or
- * clears, for Total) the status filter on the parent. Presentation-only: the
- * parent owns fetching and re-fetches after writes.
+ * Summary cards fed by GET /tickets/stats, in two perspectives:
+ *  - Status: Total / Open / In progress / Closed (filters by status).
+ *  - Priority: Low / Medium / High (filters by priority).
+ * Clicking a card toggles the matching filter on the parent; Total clears
+ * the status filter. Presentation-only — the parent owns fetching.
  */
 @Component({
   selector: 'app-ticket-stats',
@@ -29,29 +34,40 @@ interface StatCard {
 export class TicketStatsComponent {
   readonly stats = input<TicketStats | null>(null);
   readonly loading = input(false);
-  /** Currently active status filter, so the matching card can be highlighted. */
   readonly selectedStatus = input<TicketStatus | null>(null);
+  readonly selectedPriority = input<TicketPriority | null>(null);
 
   readonly statusSelect = output<TicketStatus | null>();
+  readonly prioritySelect = output<TicketPriority | null>();
 
-  protected readonly cards: StatCard[] = [
+  // Status perspective uses blue accents; priority uses orange — matching badges.
+  protected readonly statusCards: StatusCard[] = [
     { key: 'total', label: 'Total', accent: 'text-foreground', filter: null },
     { key: 'open', label: 'Open', accent: 'text-blue-600 dark:text-blue-400', filter: 'open' },
-    { key: 'in_progress', label: 'In progress', accent: 'text-accent-foreground', filter: 'in_progress' },
-    { key: 'closed', label: 'Closed', accent: 'text-emerald-600 dark:text-emerald-400', filter: 'closed' },
+    { key: 'in_progress', label: 'In progress', accent: 'text-blue-700 dark:text-blue-300', filter: 'in_progress' },
+    { key: 'closed', label: 'Closed', accent: 'text-blue-800 dark:text-blue-200', filter: 'closed' },
   ];
 
-  protected count(key: StatCard['key']): number {
+  protected readonly priorityCards: PriorityCard[] = [
+    { key: 'low', label: 'Low', accent: 'text-orange-600 dark:text-orange-400' },
+    { key: 'medium', label: 'Medium', accent: 'text-orange-700 dark:text-orange-300' },
+    { key: 'high', label: 'High', accent: 'text-orange-800 dark:text-orange-200' },
+  ];
+
+  protected count(key: 'total' | TicketStatus | TicketPriority): number {
     const s = this.stats();
     return s ? s[key] : 0;
   }
 
-  protected isActive(card: StatCard): boolean {
-    return this.selectedStatus() === card.filter && card.filter !== null;
+  protected isStatusActive(card: StatusCard): boolean {
+    return card.filter !== null && this.selectedStatus() === card.filter;
   }
 
-  protected onSelect(card: StatCard): void {
-    // Clicking the already-active status clears it; Total always clears.
+  protected isPriorityActive(card: PriorityCard): boolean {
+    return this.selectedPriority() === card.key;
+  }
+
+  protected onStatus(card: StatusCard): void {
     if (card.filter === null || this.selectedStatus() === card.filter) {
       this.statusSelect.emit(null);
     } else {
@@ -59,5 +75,7 @@ export class TicketStatsComponent {
     }
   }
 
-  protected readonly accentForActive = computed(() => this.selectedStatus());
+  protected onPriority(card: PriorityCard): void {
+    this.prioritySelect.emit(this.selectedPriority() === card.key ? null : card.key);
+  }
 }

@@ -194,8 +194,11 @@ function bulkUpdate(body: { ids: string[]; status: TicketStatus }): BulkUpdateRe
 }
 
 function computeStats(): TicketStats {
-  const stats: TicketStats = { open: 0, in_progress: 0, closed: 0, total: mockStore.tickets.length };
-  for (const t of mockStore.tickets) stats[t.status]++;
+  const stats: TicketStats = { open: 0, in_progress: 0, closed: 0, total: mockStore.tickets.length, low: 0, medium: 0, high: 0 };
+  for (const t of mockStore.tickets) {
+    stats[t.status]++;
+    stats[t.priority]++;
+  }
   return stats;
 }
 

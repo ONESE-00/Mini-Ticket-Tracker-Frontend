@@ -92,8 +92,8 @@
         }
       </form>
 
-      <!-- History on view/edit -->
-      @if (!isCreate()) {
+      <!-- History on view only -->
+      @if (isView()) {
         <div class="mt-6 border-t pt-4">
           <app-ticket-history [entries]="history()" [loading]="loadingHistory()" />
         </div>

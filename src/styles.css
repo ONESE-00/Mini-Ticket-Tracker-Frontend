@@ -155,31 +155,34 @@
    renders each toast as [data-sonner-toast][data-type]. richColors is on, so
    these per-type CSS variables drive the colours. */
 :where([data-sonner-toaster][data-rich-colors='true']) {
-  /* Type accents (full colour). */
-  --toast-success: oklch(0.62 0.17 150);
-  --toast-error: oklch(0.58 0.22 27);
-  --toast-warning: oklch(0.72 0.17 60);
-  --toast-info: oklch(0.5 0.12 264);
+  /* Exact ReconMaster accent colours. */
+  --toast-success: #05af21; /* --green */
+  --toast-error: #ed1d24; /* --red */
+  --toast-warning: #f57e20; /* --orange */
+  --toast-info: #2a5caa; /* --dark-blue */
 
-  /* Success — green border/text, 10% tint background. */
+  /* Success — green border/text, 10% tint background (fallback #e6f7ea). */
   --success-border: var(--toast-success);
   --success-text: var(--toast-success);
-  --success-bg: color-mix(in srgb, var(--toast-success) 12%, #fff);
+  --success-bg: #e6f7ea;
+  --success-bg: color-mix(in srgb, var(--toast-success) 10%, #fff);
 
-  /* Error — red. */
+  /* Error — red (fallback #fdeaea). */
   --error-border: var(--toast-error);
   --error-text: var(--toast-error);
-  --error-bg: color-mix(in srgb, var(--toast-error) 12%, #fff);
+  --error-bg: #fdeaea;
+  --error-bg: color-mix(in srgb, var(--toast-error) 10%, #fff);
 
-  /* Warning — orange. */
+  /* Warning — orange (fallback #fef1e6). */
   --warning-border: var(--toast-warning);
   --warning-text: var(--toast-warning);
-  --warning-bg: color-mix(in srgb, var(--toast-warning) 12%, #fff);
+  --warning-bg: #fef1e6;
+  --warning-bg: color-mix(in srgb, var(--toast-warning) 10%, #fff);
 
-  /* Info — brand blue. */
+  /* Info — dark blue. */
   --info-border: var(--toast-info);
   --info-text: var(--toast-info);
-  --info-bg: color-mix(in srgb, var(--toast-info) 12%, #fff);
+  --info-bg: color-mix(in srgb, var(--toast-info) 10%, #fff);
 }
 
 /* Card shape + motion, matching the reconmaster look. */

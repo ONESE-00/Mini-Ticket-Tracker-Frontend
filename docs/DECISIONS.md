@@ -59,3 +59,24 @@ Running log of non-obvious choices and assumptions. Feeds the README
 
 - Lazy-load the tickets feature route to keep the initial bundle small (Zard adds
   weight); production initial budget temporarily raised while scaffolding.
+
+## Component conventions
+
+- **Templates live in their own `.html` files** (`templateUrl`), not inline in
+  the `.ts`, to keep UI separate from logic. Inline templates only when a
+  component is trivially small and it is explicitly warranted.
+
+## Data table (Phase 3)
+
+- **Presentation-only and generic.** `DataTableComponent<T>` carries no domain
+  knowledge; the parent owns data, page, filters and sort and the table emits
+  intent (`searchChange` debounced 300ms, `filterChange`, `sortChange`,
+  `pageChange`, `selectionChange`, `actionClick`, `rowClick`). Verified by a spec
+  that renders two unrelated row shapes (ticket-like and user-like) through the
+  same component with no internal changes, asserting each output fires.
+- **Badges** render through Zard `z-badge` (`zType="secondary"`) with the tint
+  class from the column `badgeMap` merged via the component's `class` input.
+- **Checkbox indeterminate:** Zard's `z-checkbox` does not expose a native
+  indeterminate state, so the header "select all" shows checked only when every
+  row on the current page is selected; partial selection shows unchecked.
+  Selection is tracked by id and preserved across pages by the parent.

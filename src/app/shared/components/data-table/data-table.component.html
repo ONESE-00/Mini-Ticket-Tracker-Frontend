@@ -1,0 +1,206 @@
+<div class="flex flex-col gap-4">
+  <!-- Toolbar: search + filters on the left, projected actions on the right. -->
+  @if (searchable() || filters().length || hasToolbar()) {
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+        @if (searchable()) {
+          <div class="relative w-full sm:max-w-xs">
+            <ng-icon name="lucideSearch" class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              z-input
+              type="search"
+              class="pl-8"
+              [attr.aria-label]="searchPlaceholder()"
+              [placeholder]="searchPlaceholder()"
+              [ngModel]="searchText()"
+              (ngModelChange)="onSearchInput($event)"
+            />
+          </div>
+        }
+
+        @for (filter of filters(); track filter.key) {
+          <z-select
+            class="w-full sm:w-44"
+            [zPlaceholder]="filter.label"
+            [ngModel]="filterValue(filter.key)"
+            (ngModelChange)="filterChange.emit({ key: filter.key, value: $event })"
+          >
+            <z-select-item zValue="">All {{ filter.label.toLowerCase() }}</z-select-item>
+            @for (opt of filter.options; track opt.value) {
+              <z-select-item [zValue]="opt.value">{{ opt.label }}</z-select-item>
+            }
+          </z-select>
+        }
+      </div>
+
+      <div class="flex items-center gap-2">
+        <ng-content select="[dataTableToolbar]" />
+      </div>
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="w-full overflow-x-auto rounded-lg border">
+    <table z-table>
+      <thead z-table-header>
+        <tr z-table-row>
+          @if (selectable()) {
+            <th z-table-head class="w-10">
+              <z-checkbox
+                [ngModel]="allSelected()"
+                [zDisabled]="loading() || !data().length"
+                (checkChange)="toggleSelectAll($event)"
+                [attr.aria-label]="'Select all rows on this page'"
+              />
+            </th>
+          }
+
+          @for (col of columns(); track col.key) {
+            <th
+              z-table-head
+              [class]="col.width"
+              [class.text-right]="col.align === 'right'"
+              [class.text-center]="col.align === 'center'"
+              [attr.aria-sort]="ariaSort(col)"
+            >
+              @if (col.sortable) {
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 font-medium hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded"
+                  (click)="onSort(col.key)"
+                >
+                  {{ col.header }}
+                  <ng-icon [name]="sortIcon(col.key)" class="size-3.5 text-muted-foreground" />
+                </button>
+              } @else {
+                <span>{{ col.header }}</span>
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+
+      <tbody z-table-body>
+        <!-- Loading: skeleton rows -->
+        @if (loading()) {
+          @for (row of skeletonRows(); track row) {
+            <tr z-table-row>
+              @if (selectable()) {
+                <td z-table-cell><z-skeleton class="size-4 rounded" /></td>
+              }
+              @for (col of columns(); track col.key) {
+                <td z-table-cell><z-skeleton class="h-4 w-full max-w-[12rem] rounded" /></td>
+              }
+            </tr>
+          }
+        } @else if (!data().length) {
+          <!-- Empty -->
+          <tr z-table-row>
+            <td z-table-cell [attr.colspan]="columnCount()" class="py-10">
+              <z-empty zIcon="lucideSearch" [zTitle]="emptyTitle()" [zDescription]="emptyMessage()" />
+            </td>
+          </tr>
+        } @else {
+          <!-- Data rows -->
+          @for (row of data(); track rowId(row)) {
+            <tr z-table-row [class.cursor-pointer]="rowClickable()" (click)="onRowClick(row)">
+              @if (selectable()) {
+                <td z-table-cell (click)="$event.stopPropagation()">
+                  <z-checkbox
+                    [ngModel]="isSelected(row)"
+                    (checkChange)="toggleRow(row, $event)"
+                    [attr.aria-label]="'Select row'"
+                  />
+                </td>
+              }
+
+              @for (col of columns(); track col.key) {
+                <td
+                  z-table-cell
+                  [class]="col.width"
+                  [class.text-right]="col.align === 'right'"
+                  [class.text-center]="col.align === 'center'"
+                >
+                  @switch (col.type) {
+                    @case ('badge') {
+                      @let badge = badgeFor(col, row);
+                      @if (badge) {
+                        <z-badge zType="secondary" [class]="badge.class">{{ badge.label }}</z-badge>
+                      } @else {
+                        <span class="text-muted-foreground">—</span>
+                      }
+                    }
+                    @case ('date') {
+                      <span class="whitespace-nowrap text-muted-foreground">{{ dateValue(col, row) | date: 'MMM d, y' }}</span>
+                    }
+                    @case ('actions') {
+                      <div class="flex items-center justify-end gap-1">
+                        @for (action of actions(); track action.id) {
+                          @if (!action.visible || action.visible(row)) {
+                            <button
+                              z-button
+                              [zType]="action.variant ?? 'ghost'"
+                              zSize="sm"
+                              [zDisabled]="action.disabled ? action.disabled(row) : false"
+                              (click)="onActionClick(action, row, $event)"
+                            >
+                              @if (action.icon) {
+                                <ng-icon [name]="action.icon" class="size-4" />
+                              }
+                              {{ action.label }}
+                            </button>
+                          }
+                        }
+                      </div>
+                    }
+                    @case ('custom') {
+                      @let tpl = templateFor(col.cellTemplate ?? col.key);
+                      @if (tpl) {
+                        <ng-container *ngTemplateOutlet="tpl; context: { $implicit: row, row: row }" />
+                      }
+                    }
+                    @default {
+                      {{ displayText(col, row) }}
+                    }
+                  }
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer: count + page size + pagination -->
+  @if (!loading() && data().length) {
+    <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+      <p class="text-sm text-muted-foreground" aria-live="polite">
+        Showing {{ rangeStart() }} to {{ rangeEnd() }} of {{ total() }}
+      </p>
+
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-muted-foreground">Rows</span>
+          <z-select
+            class="w-20"
+            [ngModel]="String(limit())"
+            (ngModelChange)="onLimitChange($event)"
+          >
+            @for (opt of limitOptions(); track opt) {
+              <z-select-item [zValue]="String(opt)">{{ opt }}</z-select-item>
+            }
+          </z-select>
+        </div>
+
+        @if (totalPages() > 1) {
+          <z-pagination
+            [zTotal]="totalPages()"
+            [zPageIndex]="page()"
+            (zPageIndexChange)="onPageChange($event)"
+          />
+        }
+      </div>
+    </div>
+  }
+</div>

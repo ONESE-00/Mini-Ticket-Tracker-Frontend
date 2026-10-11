@@ -1,0 +1,119 @@
+<div class="flex max-h-[80vh] w-full flex-col">
+  <header class="flex flex-col gap-1 border-b px-6 py-4">
+    <h2 class="text-lg font-semibold">{{ heading() }}</h2>
+    <p class="text-sm text-muted-foreground">
+      @if (isCreate()) {
+        Open a new ticket. It starts in the Open status.
+      } @else if (isView()) {
+        Review the ticket details and its history.
+      } @else {
+        Edit the ticket. Status can only advance to the next valid step.
+      }
+    </p>
+  </header>
+
+  <div class="flex-1 overflow-y-auto px-6 py-4">
+    @if (loadingTicket()) {
+      <div class="flex flex-col gap-4">
+        <z-skeleton class="h-9 w-full rounded" />
+        <z-skeleton class="h-20 w-full rounded" />
+        <z-skeleton class="h-9 w-1/2 rounded" />
+      </div>
+    } @else if (loadError()) {
+      <div class="flex flex-col items-center gap-3 py-8 text-center">
+        <p class="text-sm font-medium">We couldn’t load this ticket.</p>
+        <p class="text-sm text-muted-foreground">The request failed. Please try again.</p>
+        <button z-button zType="outline" (click)="retry()">Try again</button>
+      </div>
+    } @else {
+      <form [formGroup]="form" class="flex flex-col gap-4" (ngSubmit)="submit()">
+        <!-- Title -->
+        <div z-field [attr.data-invalid]="(form.controls.title.touched && form.controls.title.invalid) || null">
+          <label z-field-label for="ticket-title">Title</label>
+          <input
+            z-input
+            id="ticket-title"
+            formControlName="title"
+            maxlength="200"
+            placeholder="Short summary of the issue"
+            [attr.aria-invalid]="(form.controls.title.touched && form.controls.title.invalid) || null"
+          />
+          @if (form.controls.title.touched && form.controls.title.hasError('required')) {
+            <z-field-error>Title is required.</z-field-error>
+          } @else if (form.controls.title.hasError('maxlength')) {
+            <z-field-error>Title must be 200 characters or fewer.</z-field-error>
+          } @else if (serverError('title')) {
+            <z-field-error>{{ serverError('title') }}</z-field-error>
+          }
+        </div>
+
+        <!-- Description -->
+        <div z-field>
+          <label z-field-label for="ticket-description">Description</label>
+          <textarea
+            z-textarea
+            id="ticket-description"
+            formControlName="description"
+            rows="4"
+            placeholder="Steps to reproduce, context, links…"
+          ></textarea>
+          @if (serverError('description')) {
+            <z-field-error>{{ serverError('description') }}</z-field-error>
+          }
+        </div>
+
+        <!-- Priority -->
+        <div z-field>
+          <label z-field-label for="ticket-priority">Priority</label>
+          <z-select id="ticket-priority" formControlName="priority" zPlaceholder="Select priority">
+            @for (opt of priorityOptions; track opt.value) {
+              <z-select-item [zValue]="opt.value">{{ opt.label }}</z-select-item>
+            }
+          </z-select>
+        </div>
+
+        <!-- Status: hidden/disabled on create; limited transitions on edit -->
+        @if (!isCreate()) {
+          <div z-field>
+            <label z-field-label for="ticket-status">Status</label>
+            @if (isEdit() && !statusLocked()) {
+              <z-select id="ticket-status" formControlName="status" zPlaceholder="Select status">
+                @for (opt of statusOptions(); track opt.value) {
+                  <z-select-item [zValue]="opt.value">{{ opt.label }}</z-select-item>
+                }
+              </z-select>
+            } @else {
+              <input z-input id="ticket-status" formControlName="status" readonly />
+              @if (statusLocked()) {
+                <p z-field-description>Closed tickets are terminal — status can’t change.</p>
+              }
+            }
+          </div>
+        }
+      </form>
+
+      <!-- History on view/edit -->
+      @if (!isCreate()) {
+        <div class="mt-6 border-t pt-4">
+          <app-ticket-history [entries]="history()" [loading]="loadingHistory()" />
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Footer: mode-specific actions -->
+  @if (!loadingTicket() && !loadError()) {
+    <footer class="flex items-center justify-end gap-2 border-t px-6 py-4">
+      @if (isCreate()) {
+        <button z-button zType="outline" (click)="close()" [zDisabled]="submitting()">Cancel</button>
+        <button z-button class="bg-accent text-accent-foreground hover:bg-accent/90" [zLoading]="submitting()" [zDisabled]="submitting()" (click)="submit()">Create ticket</button>
+      } @else if (isView()) {
+        <button z-button zType="outline" (click)="close()">Close</button>
+        <button z-button (click)="startEdit()">Update</button>
+      } @else {
+        <button z-button zType="outline" (click)="cancelEdit()" [zDisabled]="submitting()">Cancel</button>
+        <button z-button [zLoading]="submitting()" [zDisabled]="submitting()" (click)="submit()">Save changes</button>
+      }
+    </footer>
+  }
+</div>

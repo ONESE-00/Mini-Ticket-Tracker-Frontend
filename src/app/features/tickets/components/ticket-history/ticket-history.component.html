@@ -1,0 +1,33 @@
+<div class="flex flex-col gap-3">
+  <h3 class="text-sm font-medium">History</h3>
+
+  @if (loading()) {
+    <div class="flex flex-col gap-3">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="flex items-start gap-3">
+          <z-skeleton class="mt-1 size-2.5 rounded-full" />
+          <div class="flex flex-1 flex-col gap-1">
+            <z-skeleton class="h-4 w-48 rounded" />
+            <z-skeleton class="h-3 w-24 rounded" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (!items().length) {
+    <p class="text-sm text-muted-foreground">No history yet.</p>
+  } @else {
+    <ol class="relative flex flex-col gap-4 border-l border-border pl-5">
+      @for (item of items(); track item.id) {
+        <li class="relative">
+          <span class="absolute -left-[1.5625rem] top-1 size-2.5 rounded-full border-2 border-background bg-primary" aria-hidden="true"></span>
+          <p class="text-sm text-foreground">{{ item.sentence }}</p>
+          <p class="text-xs text-muted-foreground">
+            <span>{{ item.relative }}</span>
+            <span class="px-1">·</span>
+            <time>{{ item.absolute }}</time>
+          </p>
+        </li>
+      }
+    </ol>
+  }
+</div>

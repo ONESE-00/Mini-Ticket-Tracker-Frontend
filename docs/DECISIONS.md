@@ -55,10 +55,36 @@ Running log of non-obvious choices and assumptions. Feeds the README
   so no feature code imports the Zard toast directly.
 - **Light mode only** for now; dark-mode token values are left at Zard defaults.
 
-## Open items / to revisit
+## Ticket dialog (Phase 5)
 
-- Lazy-load the tickets feature route to keep the initial bundle small (Zard adds
-  weight); production initial budget temporarily raised while scaffolding.
+- **One dialog, three modes.** `TicketFormDialogComponent` handles create / view /
+  edit. View flips to edit in place (same dialog instance) via a `mode` signal,
+  rather than opening a second dialog. Opened through `ZardDialogService.create`
+  with `zHideHeader`/`zHideFooter` so the component owns its own header, footer
+  and per-mode buttons.
+- **Result handoff.** `ZardDialogRef` exposes a `result` signal but no
+  `afterClosed()` observable, so the opener passes an `onResult` callback via
+  `zData`; the dialog calls it with `'saved'` (page refreshes list + stats) or
+  `'dismissed'` before closing. Avoids instance-timing races.
+- **Fetch on open.** View/edit fetch the ticket by id (never trust the stale
+  table row) with a skeleton while loading and an error state + retry. History is
+  fetched in parallel and shown as a timeline (newest first, human sentences,
+  relative + absolute time).
+- **Transitions enforced in the UI.** Edit mode's status select offers only the
+  current status and its single next valid transition (`nextStatus`); closed
+  tickets lock the field. `PATCH` sends only changed fields. A server 409 is
+  surfaced via the toast and leaves the form usable.
+- **Validation.** Reactive forms with `z-field` / `z-field-error`; title required
+  and max 200. A 400 with `fieldErrors` maps each message onto its control
+  (`setErrors({ server })`) for inline display.
+
+## Open items / tradeoffs
+
+- Tickets feature route is lazy-loaded; production initial budget was raised
+  while Zard was added (production build tree-shakes well, ~140KB transfer).
+- **URL sync skipped** (optional per the brief): query state (status, priority,
+  page, …) lives in signals, not the URL, so refresh/share won't preserve
+  filters. Would add `Router` query-param sync with more time.
 
 ## Component conventions
 

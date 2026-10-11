@@ -10,6 +10,8 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideEye, lucidePencil, lucidePlus } from '@ng-icons/lucide';
 
 import { TicketStatsComponent } from '../../components/ticket-stats/ticket-stats.component';
+import { TicketFormDialogComponent, type TicketDialogData } from '../../components/ticket-form-dialog/ticket-form-dialog.component';
+import { ZardDialogService } from '@/shared/components/dialog/dialog.service';
 import { PRIORITY_BADGE_MAP, STATUS_BADGE_MAP } from '../../ticket-badges';
 import { PRIORITY_LABELS, STATUS_LABELS } from '../../ticket.constants';
 import type { Ticket, TicketPriority, TicketQuery, TicketStats, TicketStatus } from '../../ticket.model';
@@ -37,6 +39,7 @@ interface TicketsQueryState {
 })
 export default class TicketsPageComponent {
   private readonly ticketsApi = inject(TicketsApiService);
+  private readonly dialog = inject(ZardDialogService);
 
   // ---- query state (signals)
   protected readonly query = signal<TicketsQueryState>({
@@ -166,18 +169,38 @@ export default class TicketsPageComponent {
     this.selectedIds.set(ids);
   }
 
-  // ---- Create button (dialog wired in Phase 5)
+  // ---- Create button + row actions open the ticket dialog
   protected onCreate(): void {
-    // Placeholder until Phase 5 wires the dialog.
+    this.openDialog({ mode: 'create' });
   }
 
   protected onAction(event: ActionEvent<TicketRow>): void {
-    // View / Update open the dialog in Phase 5. Row is a Ticket at runtime.
-    const _ticket = event.row as unknown as Ticket;
-    void _ticket;
+    const ticket = event.row as unknown as Ticket;
+    if (event.actionId === 'view') {
+      this.openDialog({ mode: 'view', ticketId: ticket.id });
+    } else if (event.actionId === 'update') {
+      this.openDialog({ mode: 'edit', ticketId: ticket.id });
+    }
   }
 
-  /** Re-fetch the list and stats after a write (used by later phases). */
+  private openDialog(data: Omit<TicketDialogData, 'onResult'>): void {
+    this.dialog.create<TicketFormDialogComponent, TicketDialogData>({
+      zContent: TicketFormDialogComponent,
+      zWidth: '32rem',
+      zHideHeader: true,
+      zHideFooter: true,
+      zData: {
+        ...data,
+        onResult: (result) => {
+          if (result === 'saved') {
+            this.refresh();
+          }
+        },
+      },
+    });
+  }
+
+  /** Re-fetch the list and stats after a write. */
   protected refresh(): void {
     this.query.update((q) => ({ ...q }));
     this.statsReload.update((n) => n + 1);

@@ -6,7 +6,7 @@ import type { BulkUpdateResult, CreateTicketDto, Ticket, TicketHistoryEntry, Tic
 import type { ApiError, SpringPage } from '../api/api.types';
 import { mockStore, newId } from './mock-data';
 
-// Matches the ApiService base: environment.apiBaseUrl ('/api') + '/v1/tickets'.
+// Matches the service base: environment.apiBaseUrl ('/api') + '/v1/tickets'.
 const TICKETS = '/api/v1/tickets';
 
 const latency = () => 200 + Math.floor(Math.random() * 200); // 200–400ms

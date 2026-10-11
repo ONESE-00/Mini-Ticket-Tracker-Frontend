@@ -4,7 +4,8 @@
 
 /**
  * Raw Spring Data `Page<T>` JSON. `number` is 0-based. We never leak this
- * shape into components — the ApiService adapts it into the UI `Page<T>` below.
+ * shape into components — the TicketsApiService adapts it into the UI `Page<T>`
+ * below.
  */
 export interface SpringPage<T> {
   content: T[];
@@ -20,7 +21,7 @@ export interface SpringPage<T> {
 
 /**
  * Query params understood by Spring `Pageable`. `page` is 0-based, `size` is
- * the page size, `sort` is `property,direction` (repeatable). The ApiService
+ * the page size, `sort` is `property,direction` (repeatable). The service
  * builds these from the UI's 1-based query state.
  */
 export interface PageableParams {

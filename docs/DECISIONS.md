@@ -42,12 +42,17 @@ Running log of non-obvious choices and assumptions. Feeds the README
   foreground (contrast 15.86). `--accent` = `#f37d00` (oklch 0.711 0.177 54.5),
   near-black foreground (contrast 7.74) — white on orange fails AA, so accent
   text is dark. Focus ring and active sidebar item use the primary blue.
-- **`handleResponse` operator factory.** One RxJS operator on `ApiService` owns
-  success/error toasts and maps every `HttpErrorResponse` into a typed `ApiError`
-  (network, 400 + `fieldErrors`, 404, 409, 5xx), rethrowing it so components can
-  still react (e.g. place field errors on form controls). Reads are silent on
-  success; writes announce. Toasts go through a single `ToastService` wrapper so
-  no feature code imports the Zard toast directly.
+- **`handleResponse` operator factory.** One RxJS operator owns success/error
+  toasts. It follows the owner's established service style: a single flat
+  `TicketsApiService` holds `HttpClient` directly, every method takes its own
+  arguments plus a `showSuccess` boolean (reads default `false` — no toast while
+  searching/paginating a table; writes default `true`), and each call pipes
+  `.pipe(this.handleResponse({ showSuccess }))`. On success it reads
+  `response.message ?? response?.result?.message ?? 'Success'`; on error it reads
+  `error?.error?.message || error?.message` and rethrows the original error so
+  components can still react (e.g. read `error.error.fieldErrors` onto a form).
+  Toasts go through a single `ToastService` wrapper (`alertSuccess`/`alertError`)
+  so no feature code imports the Zard toast directly.
 - **Light mode only** for now; dark-mode token values are left at Zard defaults.
 
 ## Open items / to revisit

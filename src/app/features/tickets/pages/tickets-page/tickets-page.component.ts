@@ -186,10 +186,13 @@ export default class TicketsPageComponent {
   private openDialog(data: Omit<TicketDialogData, 'onResult'>): void {
     // Create has no history (single column) so stays compact (base 32rem +10%);
     // view/edit place the form and history side by side, so they need room.
+    // The Zard dialog panel caps width at `sm:max-w-sm` (24rem) by default, so
+    // we lift that cap via zCustomClasses and let zWidth drive the real width.
     const zWidth = data.mode === 'create' ? '35.2rem' : 'min(52rem, 95vw)';
     this.dialog.create<TicketFormDialogComponent, TicketDialogData>({
       zContent: TicketFormDialogComponent,
       zWidth,
+      zCustomClasses: 'sm:max-w-none',
       zHideHeader: true,
       zHideFooter: true,
       zData: {

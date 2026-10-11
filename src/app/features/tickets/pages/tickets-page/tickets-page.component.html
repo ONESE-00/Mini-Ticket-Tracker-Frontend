@@ -1,0 +1,43 @@
+<div class="flex flex-col gap-6">
+  <header class="flex flex-col gap-1">
+    <h1 class="text-2xl font-semibold tracking-tight">Tickets</h1>
+    <p class="text-sm text-muted-foreground">Track and triage work across your team.</p>
+  </header>
+
+  <app-ticket-stats
+    [stats]="stats()"
+    [loading]="statsLoading()"
+    [selectedStatus]="selectedStatus()"
+    (statusSelect)="onStatusCard($event)"
+  />
+
+  <app-data-table
+    [columns]="columns"
+    [data]="rows()"
+    [loading]="loading()"
+    [total]="total()"
+    [page]="page()"
+    [limit]="limit()"
+    [sort]="sort()"
+    [actions]="actions"
+    [filters]="filters"
+    [filterValues]="filterValues()"
+    [selectable]="true"
+    [selectedIds]="selectedIds()"
+    [searchable]="true"
+    searchPlaceholder="Search tickets…"
+    emptyTitle="No tickets found"
+    emptyMessage="Try adjusting your filters, or create a new ticket."
+    (searchChange)="onSearch($event)"
+    (filterChange)="onFilter($event)"
+    (sortChange)="onSort($event)"
+    (pageChange)="onPage($event)"
+    (selectionChange)="onSelectionChange($event)"
+    (actionClick)="onAction($event)"
+  >
+    <button dataTableToolbar z-button zType="default" class="bg-accent text-accent-foreground hover:bg-accent/90" (click)="onCreate()">
+      <ng-icon name="lucidePlus" class="size-4" />
+      Create ticket
+    </button>
+  </app-data-table>
+</div>

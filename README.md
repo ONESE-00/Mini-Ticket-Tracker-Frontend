@@ -18,7 +18,7 @@ backend under `/api`.
 ## 1. Install
 
 ```bash
-npm install
+npm ci
 ```
 
 ## 2. Run from source (development)
